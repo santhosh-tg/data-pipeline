@@ -1,0 +1,101 @@
+###################### LP ############################
+
+
+# duplicate variable as env
+cloud_storage_config_environment: "{{env}}"
+ansible_vault_password: "{{lp_vault_ansible_vault_password}}"
+secrets_path: '{{inventory_dir}}/group_vars/common.yml'
+
+env_name: "{{ env }}"
+instance_name: "{{ env }}"
+instance: "{{ env }}"
+##cert_env_prefix : "{{ instance }}"
+
+##learner_user: learning
+##learner_group: learning
+##learner_user_home: "/home/{{ learner_user }}"
+
+## Common variables for LP
+# these  variables can be defined as {{instance}}_*
+
+hierarchy_keyspace_name: "{{instance}}_hierarchy_store"
+category_keyspace_name: "{{instance}}_category_store"
+assessment_keyspace_name: "{{instance}}_question_store"
+question_keyspace_name: "{{instance}}_question_store"
+
+
+
+
+dp_cassandra_connection: "{{ groups['dp-cassandra'][0] }}:9042"
+core_cassandra_connection: "{{groups['core-cassandra']|join(':9042,')}}:9042"
+core_cassandra_connection_ip: "{{ groups['core-cassandra'][0] }}"
+
+
+
+
+
+## learning service variables
+
+
+
+
+
+neo4j_dir: neo4j-learning
+
+lp_bolt_url: bolt://{{ groups['learning-neo4j-cluster'][0] }}:7687
+lp_bolt_read_url: bolt://{{ groups['learning-neo4j-cluster'][0] }}:7687
+lp_bolt_write_url: bolt://{{ groups['learning-neo4j-cluster'][0] }}:7687
+lp_url: http://{{ groups['learningall'][0] }}:8080/learning-service
+lp_tmpfile_location: /tmp
+other_bolt_url: bolt://{{ groups['learning-neo4j-cluster'][0] }}:8687
+other_bolt_read_url: bolt://{{ groups['learning-neo4j-cluster'][0] }}:8687
+other_bolt_write_url: bolt://{{ groups['learning-neo4j-cluster'][0] }}:8687
+
+
+lp_cassandra_connection: "{{groups['cassandra']|join(':9042,')}}:9042"
+cassandra_host: "{{ groups['cassandra'][0] }}"
+redis_host: "{{ groups['redis1'][0] }}"
+dp_redis_host: "{{ groups['dp-redis'][0] }}"
+kafka_brokers: "{{groups['processing-cluster-kafka']|join(':9092,')}}:9092"
+zookeepers: "{{groups['processing-cluster-zookeepers']|join(':2181,')}}:2181"
+audit_es_host: "{{ groups['composite-search-cluster']|join(':9200,')}}:9200"
+search_es_host: "{{ groups['composite-search-cluster']|join(':9200,')}}:9200"
+search_lms_es_host: "{{ groups['core-es']|join(':9200,')}}:9200"
+
+graph_passport_key: "{{ lp_vault_graph_passport_key }}"
+
+
+
+
+
+#Learning-Service baseURL
+
+##sunbird_platform_installation: "{{ sunbird_installation }}"
+
+
+
+
+
+
+
+
+azure_account: "{{ sunbird_public_storage_account_name }}"
+azure_secret: "{{ sunbird_public_storage_account_key }}"
+dedup_redis_host: "{{ dp_redis_host }}"
+kp_redis_host: "{{ groups['redisall'][0] }}"
+neo4j_route_path: "bolt://{{ groups['learning-neo4j-node1'][0] }}:7687"
+
+### Global vars
+flink_namespace: "flink-kp-{{ instance }}"
+
+
+
+##cert_cloud_storage_type: "azure"
+##cert_azure_storage_secret: "{{sunbird_private_storage_account_key}}"
+##cert_azure_storage_key: "{{sunbird_private_storage_account_name}}"
+
+default_channel: "org.sunbird"
+download_neo4j: true
+neo4j_upstream_download: false
+enable_suppress_exception: false
+
