@@ -50,6 +50,7 @@ flink_job_names:
 ### Global vars
 cloud_store: azure
 service_monitor_enabled: true
+job_classname: ""
 
 ### controlling the flink jobs log level
 flink_jobs_console_log_level: INFO
