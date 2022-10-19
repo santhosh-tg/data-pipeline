@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.sunbird</groupId>
-        <artifactId>knowledge-platform-jobs</artifactId>
+        <artifactId>data-pipeline</artifactId>
         <version>1.0</version>
     </parent>
 
@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>questionset-publish</artifactId>
+            <artifactId>async-questionset-publish</artifactId>
             <version>1.0.0</version>
             <type>jar</type>
         </dependency>

@@ -46,7 +46,7 @@ object QuestionSetPublishStreamTask {
 		val configFilePath = Option(ParameterTool.fromArgs(args).get("config.file.path"))
 		val config = configFilePath.map {
 			path => ConfigFactory.parseFile(new File(path)).resolve()
-		}.getOrElse(ConfigFactory.load("questionset-publish.conf").withFallback(ConfigFactory.systemEnvironment()))
+		}.getOrElse(ConfigFactory.load("async-questionset-publish.conf").withFallback(ConfigFactory.systemEnvironment()))
 		val publishConfig = new QuestionSetPublishConfig(config)
 		val kafkaUtil = new FlinkKafkaConnector(publishConfig)
 		val httpUtil = new HttpUtil
