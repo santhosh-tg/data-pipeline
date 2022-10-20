@@ -2,7 +2,7 @@
 Background and pipeline jobs of Sunbird inQuiry
 
 ## data-pipeline local setup
-Coming Soon!
+This readme file contains the instruction to set up and run the inQuiry data-pipeline job in local machine.
 
 ### System Requirements:
 

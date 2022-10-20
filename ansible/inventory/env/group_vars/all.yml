@@ -1,6 +1,4 @@
 ###################### inQuiry Variables############################
-
-# Review and Remove
 secrets_path: '{{inventory_dir}}/group_vars/common.yml'
 azure_secret: "{{ sunbird_public_storage_account_key }}"
 cloud_storage_config_environment: "{{env}}"
@@ -23,7 +21,4 @@ inquiry_cassandra_connection_ip: "{{ groups['core-cassandra'][0] }}"
 neo4j_route_path: "bolt://{{ groups['learning-neo4j-node1'][0] }}:7687"
 search_es_host: "{{ groups['composite-search-cluster']|join(':9200,')}}:9200"
 
-### QuestionSet Publish Config
-hierarchy_keyspace_name: "{{instance}}_hierarchy_store"
-assessment_keyspace_name: "{{instance}}_question_store"
 

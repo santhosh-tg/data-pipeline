@@ -9,7 +9,7 @@
         <maven>3.0.0</maven>
     </prerequisites>
 
-    <groupId>org.sunbird</groupId>
+	<groupId>org.sunbird</groupId>
     <artifactId>data-pipeline</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
@@ -17,9 +17,10 @@
     <description>inQuiry Flink jobs for stream processing</description>
     <url>https://inquiry.sunbird.org/</url>
 
-    <modules>
+	<modules>
+		<module>jobs-core</module>
         <module>publish-pipeline</module>
-    </modules>
+	</modules>
 
     <properties>
         <!-- maven specific properties -->

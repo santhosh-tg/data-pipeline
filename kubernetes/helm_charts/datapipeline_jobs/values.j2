@@ -110,18 +110,18 @@ base_config: |
         basePath = "{{ search_es_host }}"
     }
     schema {
-      basePath = "{{ kp_schema_base_path }}"
+      basePath = "{{ inquiry_schema_base_path }}"
       supportedVersion = {
         itemset = "2.0"
       }
     }
-questionset-publish:
-  questionset-publish: |+
+async-questionset-publish:
+  async-questionset-publish: |+
     include file("/data/flink/conf/base-config.conf")
     kafka {
-      input.topic = {{ env_name }}.assessment.publish.request
-      post_publish.topic = {{ env_name }}.assessment.postpublish.request
-      groupId = {{ env_name }}-questionset-publish-group
+      input.topic = "{{ inquiry_assessment_publish_kafka_topic_name }}"
+      post_publish.topic = "{{ inquiry_assessment_post_publish_kafka_topic_name }}"
+      groupId = "{{ inquiry_assessment_publish_group }}"
     }
     task {
       consumer.parallelism = 1
@@ -129,7 +129,7 @@ questionset-publish:
       router.parallelism = 1
     }
     question {
-      keyspace = "{{ assessment_keyspace_name }}"
+      keyspace = "{{ question_keyspace_name }}"
       table = "question_data"
     }
     questionset {
@@ -138,16 +138,28 @@ questionset-publish:
     }
     print_service.base_url = "{{ kp_print_service_base_url }}"
     cloud_storage_type="{{ cloud_store }}"
-    azure_storage_key="{{ sunbird_public_storage_account_name }}"
-    azure_storage_secret="{{ sunbird_public_storage_account_key }}"
-    azure_storage_container="{{ azure_public_container }}"
+
+    #Azure Cloud Storage Config
+    azure_storage_key="{{ azure_cred_storage_key }}"
+    azure_storage_secret="{{ azure_cred_storage_secret }}"
+    azure_storage_container="{{ azure_storage_container_name }}"
+
+    #AWS Cloud Storage Config
+    aws_storage_key= "{{ aws_cred_storage_key }}"
+    aws_storage_secret= "{{ aws_cred_storage_secret }}"
+    aws_storage_container= "{{ aws_storage_container_name }}"
+
+    #Google Cloud Storage Config
+    gcloud_client_key= "{{ gcloud_cred_client_key }}"
+    gcloud_storage_secret= "{{ gcloud_cred_private_secret }}"
+    gcloud_storage_container= "{{ gcloud_storage_container_name }}"
 
     master.category.validation.enabled ="{{ master_category_validation_enabled }}"
 
   flink-conf: |+
-    jobmanager.memory.flink.size: {{ flink_job_names['questionset-publish'].jobmanager_memory }}
-    taskmanager.memory.flink.size: {{ flink_job_names['questionset-publish'].taskmanager_memory }}
-    taskmanager.numberOfTaskSlots: {{ flink_job_names['questionset-publish'].taskslots }}
+    jobmanager.memory.flink.size: {{ flink_job_names['async-questionset-publish'].jobmanager_memory }}
+    taskmanager.memory.flink.size: {{ flink_job_names['async-questionset-publish'].taskmanager_memory }}
+    taskmanager.numberOfTaskSlots: {{ flink_job_names['async-questionset-publish'].taskslots }}
     parallelism.default: 1
     jobmanager.execution.failover-strategy: region
     taskmanager.memory.network.fraction: 0.1

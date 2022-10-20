@@ -13,7 +13,8 @@
     <name>publish-pipeline</name>
 
     <modules>
-        <module>questionset-publish</module>
+        <module>publish-core</module>
+        <module>async-questionset-publish</module>
     </modules>
 
     <build>
