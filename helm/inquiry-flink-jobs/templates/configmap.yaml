@@ -7,9 +7,159 @@ metadata:
   labels:
     app: flink
 data:
-  base-config: |+
-{{ .Values.base_config | indent 4 }}
-{{- $name := .Release.Name }}
-{{ index .Values $name | toYaml | indent 2 }}
+  base_config: |
+    kafka {
+        broker-servers = "{{ .Values.kafka_host }}:9092"
+        producer.broker-servers = "{{ .Values.kafka_host }}:9092"
+        consumer.broker-servers = "{{ .Values.kafka_host }}:9092"
+        zookeeper = "{{ .Values.zookeeper_host }}:2181"
+        producer {
+          max-request-size = 1572864
+          batch.size = 98304
+          linger.ms = 10
+        }
+      }
+      job {
+        env = "dev"
+        enable.distributed.checkpointing = false
+        statebackend {
+          blob {
+            storage {
+              account = "{{ .Values.cloud_storage_key }}.blob.core.windows.net"
+              container = "{{ .Values.cloud_storage_flink_bucketname }}"
+              checkpointing.dir = "checkpoint"
+            }
+          }
+          base.url = "wasbs://"${job.statebackend.blob.storage.container}"@"${job.statebackend.blob.storage.account}"/"${job.statebackend.blob.storage.checkpointing.dir}      }
+        }
+      }
+      task {
+        parallelism = 1
+        consumer.parallelism = 1
+        checkpointing.compressed = true
+        checkpointing.interval = 60000
+        checkpointing.pause.between.seconds = 5000
+        restart-strategy.attempts = 3
+        restart-strategy.delay = 30000 # in milli-seconds
+      }
+      redisdb.connection.timeout = 30000
+      redis {
+        host = "{{ .Values.redis_host }}"
+        port = 6379
+      }
+      redis-meta {
+        host = "{{ .Values.redis_host }}"
+        port = 6379
+      }
+      lms-cassandra {
+        host = "{{ .Values.cassandra_host }}"
+        port = "9042"
+        isMultiDCEnabled = false
+      }
+      neo4j {
+        routePath = "bolt://{{ .Values.neo4j_host }}:7687"
+        graph = "domain"
+      }
+      es {
+          basePath = "{{ .Values.elasticsearch_host }}"
+      }
+      schema {
+        basePath = "https://{{ .Values.cloud_storage_key }}.blob.core.windows.net/contents/schemas/local"
+        supportedVersion = {
+          itemset = "2.0"
+        }
+      }
+  
+  {{ if eq .Release.Name "async-questionset-publish" }}
+  async-questionset-publish: |+
+    include file("/data/flink/conf/base-config.conf")
+    kafka {
+      input.topic = "dev.inquiry.assessment.publish.request"
+      post_publish.topic = "dev.inquiry.assessment.postpublish.request"
+      groupId = "dev-inquiry-questionset-publish-group"
+    }
+    task {
+      consumer.parallelism = 1
+      parallelism = 1
+      router.parallelism = 1
+    }
+    question {
+      keyspace = "dev_inquiry_question_store"
+      table = "question_data"
+    }
+    questionset {
+      keyspace = "sunbirdstaging_inquiry_hierarchy_store"
+      table = "questionset_hierarchy"
+    }
+    print_service.base_url = "print.lern.svc.cluster.local"
+    #Cloud Storage Config
+    cloud_storage_type={{ .Values.cloud_service_provider }}
+    cloud_storage_key={{ .Values.cloud_storage_key }}
+    cloud_storage_secret={{ .Values.cloud_storage_secret }}
+    cloud_storage_container={{ .Values.cloud_storage_content_bucketname }}
+
+    master.category.validation.enabled ="Yes"
+    cloudstorage {
+      metadata.replace_absolute_path=true
+      metadata.list=["appIcon","posterImage","artifactUrl","downloadUrl","variants","previewUrl","pdfUrl"]
+      relative_path_prefix="CLOUD_STORAGE_BASE_PATH"
+      cloudstorage.read_base_path="https://{{ .Values.cloud_storage_key }}.core.windows.net"
+      cloudstorage.write_base_path=["https://{{ .Values.cloud_storage_key }}.core.windows.net"]
+    }
+
+  flink-conf: |+
+    jobmanager.memory.flink.size: 2048m
+    taskmanager.memory.flink.size: 2048m
+    taskmanager.numberOfTaskSlots: 1
+    parallelism.default: 1
+    jobmanager.execution.failover-strategy: region
+    taskmanager.memory.network.fraction: 0.1
+  {{- end }}
+
+  {{ if eq .Release.Name "questionset-republish" }}
+  questionset-republish: |+
+    include file("/data/flink/conf/base-config.conf")
+    kafka {
+      input.topic = "dev.inquiry.assessment.republish.request"
+      post_publish.topic = "dev.inquiry.assessment.postpublish.request"
+      groupId = "dev-inquiry-questionset-republish-group"
+    }
+    task {
+      consumer.parallelism = 1
+      parallelism = 1
+      router.parallelism = 1
+    }
+    question {
+      keyspace = "sunbirdstaging_inquiry_question_store"
+      table = "question_data"
+    }
+    questionset {
+      keyspace = "sunbirdstaging_inquiry_hierarchy_store"
+      table = "questionset_hierarchy"
+    }
+    print_service.base_url = "print.lern.svc.cluster.local"
+    #Cloud Storage Config
+    cloud_storage_type={{ .Values.cloud_service_provider }}
+    cloud_storage_key={{ .Values.cloud_storage_key }}
+    cloud_storage_secret={{ .Values.cloud_storage_secret }}
+    cloud_storage_container={{ .Values.cloud_storage_content_bucketname }}
+    master.category.validation.enabled ="true"
+    cloudstorage {
+      metadata.replace_absolute_path=true
+      metadata.list=["appIcon","posterImage","artifactUrl","downloadUrl","variants","previewUrl","pdfUrl"]
+      relative_path_prefix="CLOUD_STORAGE_BASE_PATH"
+      cloudstorage.read_base_path="https://{{ .Values.cloud_storage_key }}.core.windows.net"
+      cloudstorage.write_base_path=["https://{{ .Values.cloud_storage_key }}.core.windows.net"]
+    }
+
+  flink-conf: |+
+    jobmanager.memory.flink.size: 2048m
+    taskmanager.memory.flink.size: 2048m
+    taskmanager.numberOfTaskSlots: 1
+    parallelism.default: 1
+    jobmanager.execution.failover-strategy: region
+    taskmanager.memory.network.fraction: 0.1
+  {{- end }}
+  
   log4j_console_properties: |+
 {{ .Values.log4j_console_properties | indent 4 }}

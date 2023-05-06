@@ -4,12 +4,16 @@ image:
   repository: saiakhil46/inquiry-data-pipeline
   tag: release-5.2.0
 checkpoint_store_type: "azure"
-cloud_storage_key: "storageacc"
-cloud_storage_secret: "storagesecret"
-cloud_storage_endpoint: ""
-cloud_storage_path_style_access: ""
-cloud_storage_project_id: ""
-cloud_storage_flink_bucketname: "flink-storage"
+cloud_storage_key: ""
+cloud_storage_secret: ""
+cloud_storage_flink_bucketname: flink-state-backend
+
+kafka_host: kafka.dev.svc.cluster.local
+zookeeper_host: kafka-zookeeper.dev.svc.cluster.local
+elasticsearch_host: elasticsearch.dev.svc.cluster.local
+cassandra_host: cassandra.dev.svc.cluster.local
+neo4j_host: neo4j.dev.svc.cluster.local
+redis_host: redis-master.dev.svc.cluster.local
 
 serviceMonitor:
   enabled: false
@@ -79,162 +83,6 @@ log4j_console_properties: |
   # Suppress the irrelevant (wrong) warnings from the Netty channel handler
   logger.netty.name = org.apache.flink.shaded.akka.org.jboss.netty.channel.DefaultChannelPipeline
   logger.netty.level = OFF
-
-base_config: |
-  kafka {
-      broker-servers = "kafka.lern.svc.cluster.local:9092"
-      producer.broker-servers = "kafka.lern.svc.cluster.local:9092"
-      consumer.broker-servers = "kafka.lern.svc.cluster.local:9092"
-      zookeeper = "zookeeper.lern.svc.cluster.local:8080"
-      producer {
-        max-request-size = 1572864
-        batch.size = 98304
-        linger.ms = 10
-      }
-    }
-    job {
-      env = "dev"
-      enable.distributed.checkpointing = false
-      statebackend {
-        blob {
-          storage {
-            account = "storageacc.blob.core.windows.net"
-            container = "flink-container"
-            checkpointing.dir = "checkpoint"
-          }
-        }
-        base.url = ""
-      }
-    }
-    task {
-      parallelism = 1
-      consumer.parallelism = 1
-      checkpointing.compressed = true
-      checkpointing.interval = 60000
-      checkpointing.pause.between.seconds = 5000
-      restart-strategy.attempts = 3
-      restart-strategy.delay = 30000 # in milli-seconds
-    }
-    redisdb.connection.timeout = 30000
-    redis {
-      host = "redis-master.lern.svc.cluster.local"
-      port = 6379
-    }
-    redis-meta {
-      host = "redis-master.lern.svc.cluster.local"
-      port = 6379
-    }
-    lms-cassandra {
-      host = "cassandra.lern.svc.cluster.local"
-      port = "9042"
-      isMultiDCEnabled = false
-    }
-    neo4j {
-      routePath = "bolt://neo4j.inquiry.svc.cluster.local:7687"
-      graph = "domain"
-    }
-    es {
-        basePath = "elasticsearch.lern.svc.cluster.local"
-    }
-    schema {
-      basePath = "https://storageacc.blob.core.windows.net/contents/schemas/local"
-      supportedVersion = {
-        itemset = "2.0"
-      }
-    }
-
-
-async-questionset-publish:
-  async-questionset-publish: |+
-    include file("/data/flink/conf/base-config.conf")
-    kafka {
-      input.topic = "dev.inquiry.assessment.publish.request"
-      post_publish.topic = "dev.inquiry.assessment.postpublish.request"
-      groupId = "dev-inquiry-questionset-publish-group"
-    }
-    task {
-      consumer.parallelism = 1
-      parallelism = 1
-      router.parallelism = 1
-    }
-    question {
-      keyspace = "dev_inquiry_question_store"
-      table = "question_data"
-    }
-    questionset {
-      keyspace = "sunbirdstaging_inquiry_hierarchy_store"
-      table = "questionset_hierarchy"
-    }
-    print_service.base_url = "print.lern.svc.cluster.local"
-    #Cloud Storage Config
-    cloud_storage_type: "azure"
-    cloud_storage_key: "public"
-    cloud_storage_secret: "secret"
-    cloud_storage_endpoint: ""
-    cloud_storage_container: "sunbird-content-dev"
-
-    master.category.validation.enabled ="Yes"
-    cloudstorage {
-      metadata.replace_absolute_path=true
-      metadata.list=["appIcon","posterImage","artifactUrl","downloadUrl","variants","previewUrl","pdfUrl"]
-      relative_path_prefix="CLOUD_STORAGE_BASE_PATH"
-      read_base_path="https://public.blob.core.windows.net"
-      write_base_path=["https://public.blob.core.windows.net","https://obj.public.sunbird.org"]
-    }
-
-  flink-conf: |+
-    jobmanager.memory.flink.size: 2048m
-    taskmanager.memory.flink.size: 2048m
-    taskmanager.numberOfTaskSlots: 1
-    parallelism.default: 1
-    jobmanager.execution.failover-strategy: region
-    taskmanager.memory.network.fraction: 0.1
-
-questionset-republish:
-  questionset-republish: |+
-    include file("/data/flink/conf/base-config.conf")
-    kafka {
-      input.topic = "dev.inquiry.assessment.republish.request"
-      post_publish.topic = "dev.inquiry.assessment.postpublish.request"
-      groupId = "dev-inquiry-questionset-republish-group"
-    }
-    task {
-      consumer.parallelism = 1
-      parallelism = 1
-      router.parallelism = 1
-    }
-    question {
-      keyspace = "sunbirdstaging_inquiry_question_store"
-      table = "question_data"
-    }
-    questionset {
-      keyspace = "sunbirdstaging_inquiry_hierarchy_store"
-      table = "questionset_hierarchy"
-    }
-    print_service.base_url = "print.lern.svc.cluster.local"
-    #Cloud Storage Config
-    cloud_storage_type: "azure"
-    cloud_storage_key: "public"
-    cloud_storage_secret: "secret"
-    cloud_storage_endpoint: ""
-    cloud_storage_container: "sunbird-content-dev"
-    master.category.validation.enabled ="true"
-    cloudstorage {
-      metadata.replace_absolute_path=true
-      metadata.list=["appIcon","posterImage","artifactUrl","downloadUrl","variants","previewUrl","pdfUrl"]
-      relative_path_prefix="CLOUD_STORAGE_BASE_PATH"
-      read_base_path="https://public.blob.core.windows.net"
-      write_base_path=["https://public.blob.core.windows.net","https://obj.public.sunbird.org"]
-    }
-
-  flink-conf: |+
-    jobmanager.memory.flink.size: 2048m
-    taskmanager.memory.flink.size: 2048m
-    taskmanager.numberOfTaskSlots: 1
-    parallelism.default: 1
-    jobmanager.execution.failover-strategy: region
-    taskmanager.memory.network.fraction: 0.1
-
 
 async_questionset_publish_job_classname: org.sunbird.job.questionset.task.QuestionSetPublishStreamTask
 questionset_republish_job_classname: org.sunbird.job.questionset.republish.task.QuestionSetRePublishStreamTask
