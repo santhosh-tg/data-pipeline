@@ -6,7 +6,7 @@ image:
 checkpoint_store_type: "azure"
 cloud_storage_key: ""
 cloud_storage_secret: ""
-cloud_storage_flink_bucketname: flink-state-backend
+cloud_storage_content_bucketname: sunbird-content-dev
 
 kafka_host: kafka.dev.svc.cluster.local
 zookeeper_host: kafka-zookeeper.dev.svc.cluster.local

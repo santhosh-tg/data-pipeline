@@ -28,8 +28,8 @@ spec:
           - key: log4j_console_properties
             path: log4j-console.properties
       restartPolicy: OnFailure
-      imagePullSecrets:
-      - name: {{ .Values.imagepullsecrets }}
+      #imagePullSecrets:
+      #- name: {{ .Values.imagepullsecrets }}
       containers:
       - name: {{ .Release.Name }}-jobmanager
         image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"

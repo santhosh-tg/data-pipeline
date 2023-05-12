@@ -7,7 +7,7 @@ metadata:
   labels:
     app: flink
 data:
-  base_config: |
+  base-config: |
     kafka {
         broker-servers = "{{ .Values.kafka_host }}:9092"
         producer.broker-servers = "{{ .Values.kafka_host }}:9092"
@@ -30,7 +30,7 @@ data:
               checkpointing.dir = "checkpoint"
             }
           }
-          base.url = "wasbs://"${job.statebackend.blob.storage.container}"@"${job.statebackend.blob.storage.account}"/"${job.statebackend.blob.storage.checkpointing.dir}      }
+          base.url = "wasbs://"${job.statebackend.blob.storage.container}"@"${job.statebackend.blob.storage.account}"/"${job.statebackend.blob.storage.checkpointing.dir}
         }
       }
       task {
@@ -61,7 +61,7 @@ data:
         graph = "domain"
       }
       es {
-          basePath = "{{ .Values.elasticsearch_host }}"
+        basePath = "{{ .Values.elasticsearch_host }}:9200"
       }
       schema {
         basePath = "https://{{ .Values.cloud_storage_key }}.blob.core.windows.net/contents/schemas/local"
@@ -93,10 +93,10 @@ data:
     }
     print_service.base_url = "print.lern.svc.cluster.local"
     #Cloud Storage Config
-    cloud_storage_type={{ .Values.cloud_service_provider }}
-    cloud_storage_key={{ .Values.cloud_storage_key }}
-    cloud_storage_secret={{ .Values.cloud_storage_secret }}
-    cloud_storage_container={{ .Values.cloud_storage_content_bucketname }}
+    cloud_storage_type: "{{ .Values.cloud_service_provider }}"
+    cloud_storage_key: "{{ .Values.cloud_storage_key }}"
+    cloud_storage_secret: "{{ .Values.cloud_storage_secret }}"
+    cloud_storage_container: "{{ .Values.cloud_storage_content_bucketname }}"
 
     master.category.validation.enabled ="Yes"
     cloudstorage {
@@ -139,10 +139,11 @@ data:
     }
     print_service.base_url = "print.lern.svc.cluster.local"
     #Cloud Storage Config
-    cloud_storage_type={{ .Values.cloud_service_provider }}
-    cloud_storage_key={{ .Values.cloud_storage_key }}
-    cloud_storage_secret={{ .Values.cloud_storage_secret }}
-    cloud_storage_container={{ .Values.cloud_storage_content_bucketname }}
+    cloud_storage_type: "{{ .Values.cloud_service_provider }}"
+    cloud_storage_key: "{{ .Values.cloud_storage_key }}"
+    cloud_storage_secret: "{{ .Values.cloud_storage_secret }}"
+    cloud_storage_container: "{{ .Values.cloud_storage_content_bucketname }}"
+
     master.category.validation.enabled ="true"
     cloudstorage {
       metadata.replace_absolute_path=true

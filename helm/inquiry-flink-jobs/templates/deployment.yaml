@@ -25,8 +25,8 @@ spec:
             path: flink-conf.yaml
           - key: log4j_console_properties
             path: log4j-console.properties
-      imagePullSecrets:
-      - name: {{ .Values.imagepullsecrets }}
+      #imagePullSecrets:
+      #- name: "{{ .Values.imagepullsecrets }}"
       containers:
       - name: {{ .Release.Name }}-taskmanager
         image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
